@@ -35,7 +35,7 @@ Return JSON only with these exact keys:
 
 export async function generateDrugInfo(
   drug: Drug,
-  locale: "he" | "en" = "he"
+  locale: "he" | "en" = "en"
 ): Promise<Omit<DrugInfo, "drugId" | "generatedAt">> {
   const provider = resolveLLMProvider();
   if (!provider) {

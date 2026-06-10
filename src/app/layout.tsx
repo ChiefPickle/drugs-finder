@@ -14,8 +14,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "חיפוש תרופות לרופא | Physician Drug Search",
-  description: "מערכת חיפוש תרופות מרשם, מחירים ומידע רפואי",
+  title: "Physician Drug Search | Drug Finder",
+  description: "Israeli prescription drug search, prices, and clinical summaries",
   appleWebApp: {
     capable: true,
     title: "Drug Finder",
@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl" suppressHydrationWarning>
+    <html lang="en" dir="ltr" suppressHydrationWarning>
       <body
         className={`${heebo.variable} ${inter.variable} font-sans antialiased`}
       >

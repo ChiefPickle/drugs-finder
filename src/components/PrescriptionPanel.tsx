@@ -24,7 +24,7 @@ export function PrescriptionPanel() {
         ...item,
         drugName: drugs.find((d) => d.id === item.drugId)?.name || item.drugId,
       })),
-      locale: document.documentElement.lang || "he",
+      locale: document.documentElement.lang || "en",
     };
     sessionStorage.setItem(PRINT_STORAGE_KEY, JSON.stringify(payload));
     window.open("/print", "_blank");

@@ -15,7 +15,7 @@ export async function GET(
     return NextResponse.json({ error: "Drug not found" }, { status: 404 });
   }
 
-  const locale = request.nextUrl.searchParams.get("locale") === "en" ? "en" : "he";
+  const locale = request.nextUrl.searchParams.get("locale") === "he" ? "he" : "en";
   const refresh = request.nextUrl.searchParams.get("refresh") === "1";
   const cacheKey = `${id}:${locale}`;
 

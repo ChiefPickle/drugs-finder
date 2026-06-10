@@ -22,7 +22,7 @@ export default function PrintPage() {
     if (raw) setPayload(JSON.parse(raw) as PrintPayload);
   }, []);
 
-  const locale = payload?.locale === "en" ? "en" : "he";
+  const locale = payload?.locale === "he" ? "he" : "en";
 
   useEffect(() => {
     if (!payload) return;
