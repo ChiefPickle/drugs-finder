@@ -1,0 +1,41 @@
+{
+  "name": "drugs-finder",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:restart": "npm run stop && npm run dev",
+    "stop": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true",
+    "build": "npm run import-drugs && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "import-drugs": "node scripts/import-drugs.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
+    "@serwist/next": "^9.5.11",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.10.0",
+    "fuse.js": "^7.1.0",
+    "jose": "^6.2.3",
+    "next": "^15.5.0",
+    "openai": "^5.12.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "serwist": "^9.5.11"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.19.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "eslint": "^9.32.0",
+    "eslint-config-next": "^15.5.0",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.0",
+    "xlsx": "^0.18.5"
+  }
+}
