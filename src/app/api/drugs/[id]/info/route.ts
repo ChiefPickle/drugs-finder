@@ -46,6 +46,11 @@ export async function GET(
     return NextResponse.json(info);
   } catch (error) {
     console.error("Drug info LLM error:", error);
-    return NextResponse.json({ error: "Failed to generate drug info" }, { status: 500 });
+    const message =
+      error instanceof Error ? error.message : "Failed to generate drug info";
+    return NextResponse.json(
+      { error: "Failed to generate drug info", message },
+      { status: 500 }
+    );
   }
 }
