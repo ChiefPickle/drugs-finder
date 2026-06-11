@@ -1,4 +1,4 @@
-import type { Drug } from "@/types/drug";
+import type { Drug, DrugInfo } from "@/types/drug";
 
 export function parseFormFromName(name: string): string {
   const upper = name.toUpperCase();
@@ -34,4 +34,38 @@ export function heuristicEnrichment(drug: Drug): {
   const strength = parseStrengthFromName(drug.name) || "—";
   const shortDescription = `${drug.name}${drug.manufacturer ? ` (${drug.manufacturer})` : ""}. Package: ${drug.packageSize || "N/A"}.`;
   return { form, strength, shortDescription };
+}
+
+export function heuristicDrugInfo(
+  drug: Drug,
+  locale: "he" | "en"
+): Omit<DrugInfo, "drugId" | "generatedAt"> {
+  const form = parseFormFromName(drug.name) || drug.packageSize || "—";
+  const strength = parseStrengthFromName(drug.name) || "—";
+  const price =
+    drug.maxConsumerPriceWithVat != null
+      ? `${drug.maxConsumerPriceWithVat.toFixed(2)} ₪`
+      : locale === "he"
+        ? "לא זמין"
+        : "N/A";
+
+  if (locale === "he") {
+    return {
+      summary: `${drug.name} — תכשיר מרשם במחירון הישראלי. יצרן: ${drug.manufacturer || "לא ידוע"}.`,
+      indications:
+        "מידע על התוויות אינו זמין במחירון. יש לבדוק בעלון לרופא או במקור רפואי מאושר.",
+      dosage: `צורה: ${form}. עוצמה: ${strength}. אריזה: ${drug.packageSize || "—"}.`,
+      warnings:
+        "מידע זה מבוסס על נתוני המחירון בלבד ואינו תחליף לשיקול דעת רפואי או לעלון לרופא.",
+    };
+  }
+
+  return {
+    summary: `${drug.name} — prescription item in the Israeli formulary. Manufacturer: ${drug.manufacturer || "unknown"}.`,
+    indications:
+      "Indication details are not in the formulary price list. Refer to the official label or a trusted clinical reference.",
+    dosage: `Form: ${form}. Strength: ${strength}. Package: ${drug.packageSize || "—"}. Max consumer price (incl. VAT): ${price}.`,
+    warnings:
+      "This information is derived from formulary data only and is not a substitute for clinical judgment or the prescribing information.",
+  };
 }

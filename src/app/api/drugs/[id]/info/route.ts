@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDrugById } from "@/lib/drugs";
+import { heuristicDrugInfo } from "@/lib/drug-parse";
 import { getCachedDrugInfo, setCachedDrugInfo } from "@/lib/drug-info-cache";
-import { generateDrugInfo, getLLMStatusMessage, resolveLLMProvider } from "@/lib/llm";
 import type { DrugInfo } from "@/types/drug";
 
 export async function GET(
@@ -24,33 +24,13 @@ export async function GET(
     if (cached) return NextResponse.json(cached);
   }
 
-  if (!resolveLLMProvider()) {
-    return NextResponse.json(
-      {
-        error: "LLM not configured",
-        message: getLLMStatusMessage(),
-      },
-      { status: 503 }
-    );
-  }
+  const parsed = heuristicDrugInfo(drug, locale);
+  const info: DrugInfo = {
+    drugId: id,
+    ...parsed,
+    generatedAt: new Date().toISOString(),
+  };
 
-  try {
-    const parsed = await generateDrugInfo(drug, locale);
-    const info: DrugInfo = {
-      drugId: id,
-      ...parsed,
-      generatedAt: new Date().toISOString(),
-    };
-
-    setCachedDrugInfo(info, cacheKey);
-    return NextResponse.json(info);
-  } catch (error) {
-    console.error("Drug info LLM error:", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to generate drug info";
-    return NextResponse.json(
-      { error: "Failed to generate drug info", message },
-      { status: 500 }
-    );
-  }
+  setCachedDrugInfo(info, cacheKey);
+  return NextResponse.json(info);
 }

@@ -5,7 +5,6 @@ import {
   getDrugEnrichments,
   saveDrugEnrichment,
 } from "@/lib/drug-enrichment-store";
-import { generateDrugEnrichment, resolveLLMProvider } from "@/lib/llm";
 
 export async function resolveDrugEnrichment(
   drug: Drug,
@@ -20,7 +19,7 @@ export async function resolveDrugEnrichment(
   }
 
   const heuristic = heuristicEnrichment(drug);
-  const partial: DrugEnrichment = {
+  const enrichment: DrugEnrichment = {
     drugId: drug.id,
     form: heuristic.form,
     strength: heuristic.strength,
@@ -30,26 +29,7 @@ export async function resolveDrugEnrichment(
     updatedAt: new Date().toISOString(),
   };
 
-  if (!resolveLLMProvider()) {
-    return saveDrugEnrichment(partial);
-  }
-
-  try {
-    const llm = await generateDrugEnrichment(drug, locale);
-    const enrichment: DrugEnrichment = {
-      drugId: drug.id,
-      form: llm.form || partial.form,
-      strength: llm.strength || partial.strength,
-      shortDescription: llm.shortDescription || partial.shortDescription,
-      locale,
-      source: "llm",
-      updatedAt: new Date().toISOString(),
-    };
-    return saveDrugEnrichment(enrichment);
-  } catch (error) {
-    console.error("Drug enrichment LLM error:", error);
-    return saveDrugEnrichment(partial);
-  }
+  return saveDrugEnrichment(enrichment);
 }
 
 export async function resolveDrugEnrichments(
