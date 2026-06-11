@@ -177,17 +177,34 @@ export function TemplateBuilderPanel({ drugs }: { drugs: Drug[] }) {
         <div className="flex-1 min-w-0">
           {step === "edit" && (
             <>
-              <label htmlFor="tpl-filter" className="sr-only">
-                {tr("search")}
-              </label>
-              <input
-                id="tpl-filter"
-                type="search"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                placeholder={tr("tplFilterPlaceholder")}
-                className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm"
-              />
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <label htmlFor="tpl-filter" className="sr-only">
+                  {tr("search")}
+                </label>
+                <input
+                  id="tpl-filter"
+                  type="search"
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  placeholder={tr("tplFilterPlaceholder")}
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm sm:max-w-md"
+                />
+                <button
+                  type="button"
+                  onClick={handleStartReview}
+                  className={`${btnPrimary} shrink-0`}
+                >
+                  {tr("tplReviewSave")} ({selectedRows.length})
+                </button>
+              </div>
+
+              {validationErrors.length > 0 && step === "edit" && (
+                <ul className="mb-4 space-y-1 text-sm text-[var(--danger)]">
+                  {validationErrors.map((err) => (
+                    <li key={err}>{err}</li>
+                  ))}
+                </ul>
+              )}
 
               <MedicationSelectionTable
                 drugs={drugs}
@@ -195,20 +212,6 @@ export function TemplateBuilderPanel({ drugs }: { drugs: Drug[] }) {
                 onSelectionChange={updateSelection}
                 filter={filter}
               />
-
-              {validationErrors.length > 0 && step === "edit" && (
-                <ul className="mt-4 space-y-1 text-sm text-[var(--danger)]">
-                  {validationErrors.map((err) => (
-                    <li key={err}>{err}</li>
-                  ))}
-                </ul>
-              )}
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button type="button" onClick={handleStartReview} className={btnPrimary}>
-                  {tr("tplReviewSave")} ({selectedRows.length})
-                </button>
-              </div>
             </>
           )}
 
