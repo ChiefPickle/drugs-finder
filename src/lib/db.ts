@@ -38,6 +38,23 @@ export function getDb(): Database.Database {
       updated_at TEXT NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS prescription_templates (
+      id TEXT PRIMARY KEY,
+      user_id TEXT,
+      name TEXT NOT NULL,
+      condition_name TEXT NOT NULL,
+      target_patient_group TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      icon TEXT NOT NULL DEFAULT '💊',
+      drugs_json TEXT NOT NULL,
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_prescription_templates_user
+      ON prescription_templates(user_id);
   `);
 
   return db;

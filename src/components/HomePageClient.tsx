@@ -10,10 +10,11 @@ import { searchInputClass } from "@/lib/ui";
 import { AppShell } from "@/components/AppShell";
 import { DrugTable } from "@/components/DrugTable";
 import { PrescriptionPanel } from "@/components/PrescriptionPanel";
+import { TemplateBuilderPanel } from "@/components/TemplateBuilderPanel";
 import { QuickSearchTags } from "@/components/QuickSearchTags";
 import type { Drug } from "@/types/drug";
 
-type Tab = "search" | "favorites" | "prescription";
+type Tab = "search" | "favorites" | "prescription" | "templates";
 
 export default function HomePageClient() {
   const { tr, locale } = useLocale();
@@ -75,7 +76,7 @@ export default function HomePageClient() {
       tab={tab}
       onTabChange={setTab}
       favoriteCount={favoriteIds.length}
-      showFavoritesActions={tab !== "prescription"}
+      showFavoritesActions={tab !== "prescription" && tab !== "templates"}
       onExportFavorites={() => exportFavorites(favoriteIds)}
       onImportFavorites={handleImport}
       footer={
@@ -118,6 +119,8 @@ export default function HomePageClient() {
 
       {tab === "prescription" ? (
         <PrescriptionPanel />
+      ) : tab === "templates" ? (
+        <TemplateBuilderPanel drugs={drugs} />
       ) : (
         <DrugTable
           drugs={displayedDrugs}

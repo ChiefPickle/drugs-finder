@@ -22,6 +22,16 @@ export interface DrugInfo {
   generatedAt: string;
 }
 
+export interface DrugEnrichment {
+  drugId: string;
+  form: string;
+  strength: string;
+  shortDescription: string;
+  locale: "he" | "en";
+  source: "heuristic" | "llm";
+  updatedAt: string;
+}
+
 export interface FavoriteDrug extends Drug {
   savedAt: string;
 }

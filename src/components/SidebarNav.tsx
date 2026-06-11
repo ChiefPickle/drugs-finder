@@ -2,7 +2,7 @@
 
 import { useLocale } from "@/lib/i18n/context";
 
-type Tab = "search" | "favorites" | "prescription";
+type Tab = "search" | "favorites" | "prescription" | "templates";
 
 export function SidebarNav({
   tab,
@@ -19,6 +19,7 @@ export function SidebarNav({
     { id: "search", label: tr("search") },
     { id: "favorites", label: `${tr("favorites")} (${favoriteCount})` },
     { id: "prescription", label: tr("prescription") },
+    { id: "templates", label: tr("templates") },
   ];
 
   return (

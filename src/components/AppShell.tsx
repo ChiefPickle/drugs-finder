@@ -8,7 +8,7 @@ import { SidebarNav } from "@/components/SidebarNav";
 import { useLocale } from "@/lib/i18n/context";
 import { btnSecondary } from "@/lib/ui";
 
-type Tab = "search" | "favorites" | "prescription";
+type Tab = "search" | "favorites" | "prescription" | "templates";
 
 export function AppShell({
   tab,
