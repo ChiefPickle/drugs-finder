@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Drug } from "@/types/drug";
 import type { DrugEnrichment } from "@/types/drug";
 import { heuristicEnrichment } from "@/lib/drug-parse";
+import { fetchEnrichmentsBatch, loadCachedEnrichments } from "@/lib/drug-enrichment-client";
 import { useLocale } from "@/lib/i18n/context";
 import { FREQUENCY_OPTIONS } from "@/types/template";
 import type { DrugSelectionRow } from "@/types/template";
@@ -26,6 +27,12 @@ export function MedicationSelectionTable({
   const [page, setPage] = useState(1);
   const [enrichments, setEnrichments] = useState<Record<string, DrugEnrichment | null>>({});
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
+  const attemptedIds = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    setEnrichments(loadCachedEnrichments(locale));
+    attemptedIds.current = new Set();
+  }, [locale]);
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
@@ -49,72 +56,78 @@ export function MedicationSelectionTable({
   useEffect(() => {
     let cancelled = false;
     const ids = pageDrugs.map((d) => d.id);
+    const missing = ids.filter(
+      (id) => !enrichments[id] && !attemptedIds.current.has(id)
+    );
 
-    async function load() {
-      for (const id of ids) {
+    if (!missing.length) return;
+
+    for (const id of missing) attemptedIds.current.add(id);
+
+    setLoadingIds((prev) => {
+      const next = new Set(prev);
+      for (const id of missing) next.add(id);
+      return next;
+    });
+
+    fetchEnrichmentsBatch(missing, locale)
+      .then((batch) => {
         if (cancelled) return;
-        if (enrichments[id] !== undefined) continue;
-        setLoadingIds((prev) => new Set(prev).add(id));
-        try {
-          const res = await fetch(`/api/drugs/${id}/enrichment?locale=${locale}`);
-          if (res.ok) {
-            const data = (await res.json()) as DrugEnrichment;
-            if (!cancelled) {
-              setEnrichments((prev) => ({ ...prev, [id]: data }));
+        setEnrichments((prev) => {
+          const next = { ...prev };
+          for (const drug of pageDrugs) {
+            if (batch[drug.id]) {
+              next[drug.id] = batch[drug.id];
+              continue;
             }
-          } else {
-            const drug = pageDrugs.find((d) => d.id === id);
-            if (drug && !cancelled) {
-              const h = heuristicEnrichment(drug);
-              setEnrichments((prev) => ({
-                ...prev,
-                [id]: {
-                  drugId: id,
-                  form: h.form,
-                  strength: h.strength,
-                  shortDescription: h.shortDescription,
-                  locale,
-                  source: "heuristic",
-                  updatedAt: new Date().toISOString(),
-                },
-              }));
-            }
-          }
-        } catch {
-          const drug = pageDrugs.find((d) => d.id === id);
-          if (drug && !cancelled) {
+            if (next[drug.id]) continue;
             const h = heuristicEnrichment(drug);
-            setEnrichments((prev) => ({
-              ...prev,
-              [id]: {
-                drugId: id,
-                form: h.form,
-                strength: h.strength,
-                shortDescription: h.shortDescription,
-                locale,
-                source: "heuristic",
-                updatedAt: new Date().toISOString(),
-              },
-            }));
+            next[drug.id] = {
+              drugId: drug.id,
+              form: h.form,
+              strength: h.strength,
+              shortDescription: h.shortDescription,
+              locale,
+              source: "heuristic",
+              updatedAt: new Date().toISOString(),
+            };
           }
-        } finally {
-          if (!cancelled) {
-            setLoadingIds((prev) => {
-              const next = new Set(prev);
-              next.delete(id);
-              return next;
-            });
+          return next;
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setEnrichments((prev) => {
+          const next = { ...prev };
+          for (const drug of pageDrugs) {
+            if (next[drug.id]) continue;
+            const h = heuristicEnrichment(drug);
+            next[drug.id] = {
+              drugId: drug.id,
+              form: h.form,
+              strength: h.strength,
+              shortDescription: h.shortDescription,
+              locale,
+              source: "heuristic",
+              updatedAt: new Date().toISOString(),
+            };
           }
-        }
-      }
-    }
+          return next;
+        });
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoadingIds((prev) => {
+          const next = new Set(prev);
+          for (const id of missing) next.delete(id);
+          return next;
+        });
+      });
 
-    load();
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageDrugs.map((d) => d.id).join(","), locale]);
+  }, [pageDrugs, locale, enrichments]);
 
   function getRow(drugId: string): DrugSelectionRow {
     return (

@@ -55,6 +55,17 @@ export function getDb(): Database.Database {
 
     CREATE INDEX IF NOT EXISTS idx_prescription_templates_user
       ON prescription_templates(user_id);
+
+    CREATE TABLE IF NOT EXISTS drug_enrichments (
+      drug_id TEXT NOT NULL,
+      locale TEXT NOT NULL,
+      form TEXT NOT NULL DEFAULT '',
+      strength TEXT NOT NULL DEFAULT '',
+      short_description TEXT NOT NULL DEFAULT '',
+      source TEXT NOT NULL DEFAULT 'heuristic',
+      updated_at TEXT NOT NULL,
+      PRIMARY KEY (drug_id, locale)
+    );
   `);
 
   return db;
